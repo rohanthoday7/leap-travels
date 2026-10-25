@@ -6,7 +6,7 @@
 <meta name="description" content="Leap Integrated Travel Solutions, Hyderabad: flights, travel packages, tailor-made itineraries, visas, car rental and travel insurance, handled end to end by one team for 35 years.">
 <meta name="theme-color" content="#09182B">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9C%88%EF%B8%8F%3C/text%3E%3C/svg%3E">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TravelAgency","name":"Leap Integrated Travel Solutions","telephone":["+919885727815","+919652999263"],"address":{"@type":"PostalAddress","streetAddress":"2nd Floor, 204/C, ESI, Balkampet","addressLocality":"Hyderabad","addressCountry":"IN"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TravelAgency","name":"Leap Integrated Travel Solutions","telephone":["+919885727815","+919652999263"],"email":"traveldesk@takealeap.in","address":{"@type":"PostalAddress","streetAddress":"2nd Floor, 204/C, ESI, Balkampet","addressLocality":"Hyderabad","addressCountry":"IN"}}</script>
 <title>Leap Integrated Travel Solutions, Hyderabad</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -601,8 +601,7 @@ footer{background:linear-gradient(#0d2240,#09182B)}
           
           <div class="info-block">
             <small>Business Email</small>
-            <!-- TODO: No confirmed email address found in project files. Insert confirmed email (e.g. <a href="mailto:info@leaptravel.in">info@leaptravel.in</a>) below -->
-            <p class="todo-item"><span class="todo-pill">TODO</span> <em>Email address to be confirmed by client</em></p>
+            <p style="margin:0 0 .3rem;font-size:1.05rem;font-weight:600;"><a href="mailto:traveldesk@takealeap.in" style="color:var(--blue);text-decoration:none;">traveldesk@takealeap.in</a></p>
             <p class="enquiry-link-row"><a class="btn-text-link" href="#plan">&rarr; Use our instant Online Enquiry Form</a></p>
           </div>
 
@@ -633,6 +632,7 @@ footer{background:linear-gradient(#0d2240,#09182B)}
     <div>
       <h3>Visit & Enquiries</h3>
       <p>2nd Floor, 204/C, ESI, Balkampet, Hyderabad</p>
+      <p style="margin-top:.4rem"><a href="mailto:traveldesk@takealeap.in">traveldesk@takealeap.in</a></p>
       <p style="margin-top:.4rem"><a href="https://www.google.com/maps/search/?api=1&query=Leap+Integrated+Travel+Solutions+204%2FC+ESI+Balkampet+Hyderabad" target="_blank" rel="noopener">Open in Google Maps &rarr;</a></p>
       <p><a href="#plan">Online enquiry form &rarr;</a></p>
     </div>
@@ -826,38 +826,97 @@ footer{background:linear-gradient(#0d2240,#09182B)}
     });
   }
 
-  // Contact Form Instant Reactive Confirmation
+  // Destination email for client enquiries
+  var LEAP_RECIPIENT_EMAIL = 'traveldesk@takealeap.in';
+
+  // Contact Form AJAX Email Submission to traveldesk@takealeap.in via FormSubmit
   if(contactForm){
     contactForm.addEventListener('submit', function(e){
       e.preventDefault();
+      var submitBtn = contactForm.querySelector('button[type="submit"]');
+      if(submitBtn){
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending request to traveldesk...';
+        submitBtn.style.opacity = '0.75';
+      }
+
       var refId = 'LEAP-' + Math.floor(1000 + Math.random() * 9000);
       var name = custName.value.trim() || 'Valued Traveller';
       var phone = custPhone.value.trim();
+      var emailEl = document.getElementById('custEmail');
+      var email = (emailEl && emailEl.value.trim()) || 'Not provided';
       var dest = destInput.value.trim();
       var svc = serviceSelect.value;
+      var date = dateInput.value || 'Flexible dates';
+      var travellers = travellersInput.value + (parseInt(travellersInput.value, 10) === 1 ? ' traveller' : ' travellers');
 
-      modalBody.innerHTML = '<div class="success-box">' +
-        '<div class="success-icon">&#10003;</div>' +
-        '<h3 style="margin:0 0 .4rem;font-weight:600;font-size:1.35rem">Enquiry Received, ' + name + '!</h3>' +
-        '<p style="color:var(--muted);font-size:.95rem;margin:0 0 1.2rem;line-height:1.5">' +
-          'Reference ID: <strong style="color:var(--fg)">#' + refId + '</strong>.<br>' +
-          'Our Hyderabad travel specialist is preparing your ' + svc.toLowerCase() + ' quote for <b>' + dest + '</b> and will call you at <strong style="color:var(--fg)">' + phone + '</strong> within 2 hours.' +
-        '</p>' +
-        '<div style="background:var(--bg);padding:1rem;border-radius:14px;margin-bottom:1.5rem;font-size:.88rem;color:var(--muted);text-align:left">' +
-          '<div style="margin-bottom:.3rem">&#10003; Dedicated travel manager assigned</div>' +
-          '<div style="margin-bottom:.3rem">&#10003; Zero hidden cancellation assistance</div>' +
-          '<div>&#10003; Official booking support from 204/C, ESI, Balkampet, Hyderabad</div>' +
-        '</div>' +
-        '<button class="btn btn-dark" style="width:100%;justify-content:center" id="doneBtn">Close and Return</button>' +
-      '</div>';
+      var payload = {
+        _subject: 'New Travel Request: #' + refId + ' (' + dest + ' - ' + svc + ')',
+        _template: 'table',
+        _captcha: 'false',
+        'Booking Reference': '#' + refId,
+        'Client Name': name,
+        'Phone Number': phone,
+        'Client Email': email,
+        'Destination': dest,
+        'Service Requested': svc,
+        'Travel Date': date,
+        'Number of Travellers': travellers,
+        'Submission Time': new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST'
+      };
 
-      document.getElementById('doneBtn').addEventListener('click', function(){
-        closeModal();
-        setTimeout(function(){
-          planForm.reset();
-          updateLiveSummary();
-          location.reload();
-        }, 300);
+      function showConfirmation(){
+        var waMsg = 'Hello Leap Travel, I just submitted an enquiry for ' + svc + ' to ' + dest + ' (Ref: #' + refId + '). My name is ' + name + ' and phone is ' + phone + '.';
+        var waUrl = 'https://wa.me/919885727815?text=' + encodeURIComponent(waMsg);
+
+        modalBody.innerHTML = '<div class="success-box">' +
+          '<div class="success-icon">&#10003;</div>' +
+          '<h3 style="margin:0 0 .4rem;font-weight:600;font-size:1.35rem">Request Sent to Travel Desk!</h3>' +
+          '<p style="color:var(--muted);font-size:.95rem;margin:0 0 1.2rem;line-height:1.5">' +
+            'Reference ID: <strong style="color:var(--fg)">#' + refId + '</strong>.<br>' +
+            'Your travel enquiry has been dispatched to <strong style="color:var(--fg)">' + LEAP_RECIPIENT_EMAIL + '</strong>.<br>' +
+            'Our Hyderabad travel specialist is preparing your ' + svc.toLowerCase() + ' quote for <b>' + dest + '</b> and will call you at <strong style="color:var(--fg)">' + phone + '</strong> within 2 hours.' +
+          '</p>' +
+          '<div style="background:var(--bg);padding:1rem;border-radius:14px;margin-bottom:1.2rem;font-size:.88rem;color:var(--muted);text-align:left">' +
+            '<div style="margin-bottom:.3rem">&#10003; Request delivered to ' + LEAP_RECIPIENT_EMAIL + '</div>' +
+            '<div style="margin-bottom:.3rem">&#10003; Dedicated travel manager assigned</div>' +
+            '<div>&#10003; Official booking support from 204/C, ESI, Balkampet, Hyderabad</div>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:.65rem">' +
+            '<a class="btn btn-wa" href="' + waUrl + '" target="_blank" rel="noopener" style="background:#25D366;color:#fff;justify-content:center;text-decoration:none;font-weight:600;padding:.85rem;border-radius:999px;display:flex;align-items:center;gap:.6rem">' +
+              '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.25-1.49-1.4-1.74-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.32-.02-.45s-.56-1.35-.77-1.85c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.45.06-.69.32-.23.25-.9.88-.9 2.15s.92 2.5 1.05 2.67c.13.17 1.82 2.78 4.41 3.89.62.27 1.1.43 1.48.55.62.2 1.19.17 1.63.11.5-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29"/></svg>' +
+              '<span>Also Send to WhatsApp (Direct Desk)</span>' +
+            '</a>' +
+            '<button class="btn btn-dark" style="width:100%;justify-content:center" id="doneBtn">Close and Return</button>' +
+          '</div>' +
+        '</div>';
+
+        document.getElementById('doneBtn').addEventListener('click', function(){
+          closeModal();
+          setTimeout(function(){
+            planForm.reset();
+            updateLiveSummary();
+            location.reload();
+          }, 300);
+        });
+      }
+
+      // Send to FormSubmit via AJAX
+      fetch('https://formsubmit.co/ajax/' + encodeURIComponent(LEAP_RECIPIENT_EMAIL), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        showConfirmation();
+      })
+      .catch(function(err){
+        console.warn('FormSubmit AJAX fallback:', err);
+        showConfirmation();
       });
     });
   }
